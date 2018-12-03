@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>World city population</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  </head>
+    <body>
+    <h1>World city population</h1>
+    <script>
+        var canvas_height = 600
+        var canvas_width = 1000
+        var svg = d3.select("body").append("svg")
+                    .attr('id','my_svg_canvas')
+                    .attr('height', canvas_height)
+                    .attr('width', canvas_width);
+
+        var worldcities=[]
+        data_is_read = false
+        grid_is_made = false
+        
+        addrect(0,0,'100%','100%','black','3px','black') //Create Background
+        make_worldpicture('ST') //call for initial 
+
+        
+        function make_worldpicture(projection){
+              //d3.select("my_svg_canvas").selectAll("*").remove();
+              
+              var i = 0
+              d3.csv("worldcities-reduced.csv", function(data) {  
+                  /*
+                  Data file buidlup:
+                  
+                  "city","city_ascii","lat","lng","country","iso2","iso3","admin_name","capital","population","id"
+                  
+                  Only lng, lat and population are pushed to worldcities
+                  */
+                  if (data_is_read == false){
+                      data.forEach(function (d){
+                        if (parseFloat(d.population) > 1){
+                            worldcities.push([parseFloat(d.lng),parseFloat(d.lat),parseFloat(d.population)]);
+                            i=i+1
+                            //add pure lat-long plot as initial plot
+                            addcirc( 'data', 'citycircle'+i, lon_to_px(parseFloat(d.lng)) , lat_to_px (parseFloat(d.lat)) ,1+parseFloat(d.population)/1200000,d3.select("#change_color_dropdown").node().value,0,0,0.25)
+                        }
+                      });	
+                      data_is_read = true
+                  }
+              });
+              
+              if (data_is_read){
+                  grid_color = d3.select("#change_grid_color_dropdown").node().value
+                  for (var i=0; i < worldcities.length; i++) {
+                  //console.log(worldcities[i][2])
+                  
+                  if (projection=='ST'){
+                       //pure lat-long plot
+                       lon = lon_to_px(worldcities[i][0])
+                       lat = lat_to_px (worldcities[i][1])
+                  }
+                  
+                  if (projection=='WT'){
+                       //Winkel_tripel :
+                       lon = lon_to_px(Winkel_tripel_x (worldcities[i][0],worldcities[i][1]))
+                       lat = lat_to_px (Winkel_tripel_y(worldcities[i][0],worldcities[i][1]))
+                  }
+                  
+                  if (projection=='KV'){
+                       //Kavrayskiy_VII :
+                       lon = lon_to_px(Kavrayskiy_VII_lon (worldcities[i][0],worldcities[i][1]))
+                       lat = lat_to_px (worldcities[i][1])
+                  }
+                  
+                  d3.selectAll("#citycircle"+i) 
+                      .attr('fill', d3.select("#change_color_dropdown").node().value)
+                      .attr('cx',lon)
+                      .attr('cy',lat)
+                  
+                  /*
+                        if (projection=='ST'){
+                            //pure lat-long plot
+                            addcirc( 'citycircle', lon_to_px(worldcities[i][0]) , lat_to_px (worldcities[i][1]) ,1+worldcities[i][2]/1200000,d3.select("#change_color_dropdown").node().value,0,0,0.25)
+                        };
+                        
+                        if (projection=='WT'){
+                            //Winkel_tripel :
+                            addcirc( 'citycircle', lon_to_px(Winkel_tripel_x (worldcities[i][0],worldcities[i][1])) , lat_to_px (Winkel_tripel_y(worldcities[i][0],worldcities[i][1])) ,1+worldcities[i][2]/1200000,d3.select("#change_color_dropdown").node().value,0,'none',0.25)
+                        };
+                        
+                        if (projection=='KV'){
+                            //Kavrayskiy_VII :
+                            addcirc( 'citycircle', lon_to_px(Kavrayskiy_VII_lon (worldcities[i][0],worldcities[i][1])) , lat_to_px (worldcities[i][1]) ,1+worldcities[i][2]/1200000,d3.select("#change_color_dropdown").node().value,0,0,0.25)
+                        };
+                        
+                        */
+                  }
+              }else{
+                  grid_color = 'orange'
+              }
+              
+              
+                    
+              if (grid_is_made){
+                  for (var i=-45; i<=45;i++){
+                      for (var j=-45; j<=45;j=j+5){
+                          if (projection=='ST'){
+                                //pure lat-long grid:
+                                great_circ_lon = lon_to_px (parseFloat(j*4))
+                                great_circ_lat = lat_to_px (parseFloat(2*i))
+                                small_circ_lon = lon_to_px (parseFloat(i*4))
+                                small_circ_lat = lat_to_px (parseFloat(2*j))
+                                eqlon = lon_to_px (parseFloat(i*4))
+                                eqlat = lat_to_px (parseFloat(2*j))
+                          };
+                            
+                          if (projection=='WT'){
+                                //Winkel_tripel grid:
+                                great_circ_lon = lon_to_px(Winkel_tripel_x (j*4,2*i))
+                                great_circ_lat = lat_to_px(Winkel_tripel_y (j*4,2*i))
+                                small_circ_lon = lon_to_px(Winkel_tripel_x (i*4,2*j))
+                                small_circ_lat = lat_to_px(Winkel_tripel_y (i*4,2*j))
+                                eqlon = lon_to_px(Winkel_tripel_x (i*4,2*j))
+                                eqlat = lat_to_px(Winkel_tripel_y (i*4,2*j))
+                          };
+                            
+                          if (projection=='KV'){
+                                //Kavrayskiy_VII grid:
+                                great_circ_lon = lon_to_px(Kavrayskiy_VII_lon (j*4,2*i))
+                                great_circ_lat = lat_to_px(2*i)
+                                small_circ_lon = lon_to_px(Kavrayskiy_VII_lon (i*4,2*j))
+                                small_circ_lat = lat_to_px(2*j)
+                                eqlon = lon_to_px(Kavrayskiy_VII_lon (i*4,2*j))
+                                eqlat = lat_to_px(2*j)
+                          };
+                          
+                          d3.selectAll("#greatcircle"+i+'-'+j)
+                                .attr('fill',d3.select("#change_grid_color_dropdown").node().value)
+                                .attr('cx',great_circ_lon)
+                                .attr('cy',great_circ_lat)
+                                
+                          d3.selectAll("#smallcircle"+i+'-'+j)
+                                .attr('fill',d3.select("#change_grid_color_dropdown").node().value)
+                                .attr('cx',small_circ_lon)
+                                .attr('cy',small_circ_lat)
+                                
+                          d3.selectAll("#equator_circle"+i+'-'+j)
+                                .attr('cx',eqlon)
+                                .attr('cy',eqlat)
+                      }
+                  }
+              }else{ //create inititial grid
+                  for (var i=-45; i<=45;i++){
+                      for (var j=-45; j<=45;j=j+5){
+                        if (projection=='ST'){
+                              //pure lat-long grid:
+                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px(parseFloat(j*4)) , lat_to_px (parseFloat(2*i)) ,1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(parseFloat(i*4)) , lat_to_px (parseFloat(2*j)) ,1,grid_color,0,0,0.4)
+                              if (j==0){
+                                  addcirc( 'grid_equator', 'equator_circle'+i+'-'+j, lon_to_px(parseFloat(i*4)) , lat_to_px (parseFloat(2*j)) ,1,'red',0,0,0.9)
+                              };
+                        };
+                          
+                        if (projection=='WT'){
+                              //Winkel_tripel grid:
+                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (j*4,2*i)) , lat_to_px(Winkel_tripel_y(j*4,2*i)),1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (i*4,2*j)) , lat_to_px(Winkel_tripel_y(i*4,2*j)),1,grid_color,0,0,0.4)
+                              if (j==0){
+                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px(Winkel_tripel_x (i*4,2*j)) , lat_to_px(Winkel_tripel_y(i*4,2*j)),1,'red',0,0,0.90)
+                              };
+                        };
+                          
+                        if (projection=='KV'){
+                              //Kavrayskiy_VII grid:
+                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (j*4,2*i)) , lat_to_px(2*i) ,1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (i*4,2*j)) , lat_to_px(2*j) ,1,grid_color,0,0,0.4)
+                              if (j==0){
+                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px(Kavrayskiy_VII_lon (i*4,2*j)) , lat_to_px(2*j) ,1,'red',0,0,0.9)
+                              };
+                        };
+                        grid_is_made = true
+                    }
+                };
+                if (projection=='KV'){
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (i*4,88)) , lat_to_px(88) ,1,grid_color,0,0,0.4) //plot top horizontal gridline
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (i*4,-88)) , lat_to_px(-88) ,1,grid_color,0,0,0.4) //plot lowes horizontal gridline
+                };
+                if (projection=='WT'){
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (i*4,88)) , lat_to_px(Winkel_tripel_y(i*4,88)) ,1,grid_color,0,0,0.4) //plot top horizontal gridline
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (i*4,-88)) , lat_to_px(Winkel_tripel_y(-i*4,-88)) ,1,grid_color,0,0,0.4) //plot lowes horizontal gridline
+                };
+              };
+        
+        };
+        
+        d3.selection("select").on("change",function(){
+            var color = d3.select("#change_color_dropdown").node().value;
+            d3.selectAll(".data").attr('fill',color)
+            var color = d3.select("#change_grid_color_dropdown").node().value;
+            d3.selectAll(".grid_circle").attr('fill',color)
+        })
+          
+        function lon_to_px (lon){
+          return ((canvas_width)*(180+parseFloat(lon)))/360.
+        }
+        
+        function lat_to_px (lat){
+          return canvas_height-canvas_height*(90+parseFloat(lat))/180
+        }
+        
+        function Kavrayskiy_VII_lon (lon,lat){
+        lon = lon*3.1415/180
+        lat = lat*3.1415/180
+        lon = 3*lon/2 * Math.sqrt( (1/3) - (lat/3.1415)**2 )
+        return lon = lon*180/3.1415
+        };
+        
+        function Winkel_tripel_x (lon,lat) {
+              if (lon==0){lon=0.0001};  // cannot divide by alpha==0
+              lon = lon*3.1415/180
+              lat = lat*3.1415/180
+              parallel = 0.5*Math.acos(2/3.1415)
+              alpha = Math.acos( Math.cos(lat)*Math.cos((lon-0)/2) )
+              lon = 0.5*( (lon-0)*Math.cos(parallel) + (2*Math.cos(lat)*Math.sin((lon-0)/2) ) / (Math.sin(alpha)/alpha))
+              return lon=lon*180/3.1415
+        };
+        
+        function Winkel_tripel_y (lon,lat) {
+              if (lon==0){lon=0.0001};  // cannot divide by alpha==0
+              lon = lon*3.1415/180
+              lat = lat*3.1415/180
+              parallel = 0.5*Math.acos(2/3.1415)
+              alpha = Math.acos( Math.cos(lat)*Math.cos((lon-0)/2) )
+              //return lon = 0.5*( lon*Math.cos(parallel) + (2*Math.cos(lat)*Math. sin(lon/2) ) / (Math.sin(alpha)/alpha))
+              lat = 0.5*( lat + Math.sin(lat)/(Math.sin(alpha)/alpha) )
+              return lat = lat*180/3.1415
+        };
+        
+        function addrect(x,y,width,height,fill,stroke_width,stroke) {
+          var name = svg.append('rect')
+              .attr('x', x)
+              .attr('y', y)
+              .attr('width', width)
+              .attr('height', height)
+              .attr('fill', fill)
+              .attr('stroke-width', stroke_width)
+              .attr('stroke', stroke);
+        };
+        
+        function addcirc(classid,id,x,y,diameter,fill,stroke_width,stroke,alpha) {
+          var name = svg.append('circle')
+              .attr('class',classid)
+              .attr('id',id)
+              .attr('cx', x)
+              .attr('cy', y)
+              .attr('r', diameter)
+              .attr('fill', fill)
+              .attr('stroke-width', stroke_width)
+              .attr('stroke', stroke)
+              .attr('fill-opacity', alpha);
+        };
+    
+    </script>
+    
+    <br>
+    <p> 
+    <input type="button" value="No projection" onclick="make_worldpicture('ST')"/>&nbsp&nbsp&nbsp
+    <input type="button" value="Kavrayskiy VII projection" onclick="make_worldpicture('KV')"/>&nbsp&nbsp&nbsp
+    <input type="button" value="Winkel Tripel projection" onclick="make_worldpicture('WT')"/>&nbsp&nbsp&nbsp <br><br>
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data Color:   
+        <select id="change_color_dropdown">
+          <option value="chocolate">chocolate</option>
+          <option value="white">white</option>
+          <option value="cyan">cyan</option>
+          <option value="green">green</option>
+        </select>
+
+
+    
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Grid Color:   
+        <select id="change_grid_color_dropdown">
+          <option value="chocolate">chocolate</option>
+          <option value="white">white</option>
+          <option value="hotpink">Pink</option>
+        </select>
+    </p>
+    
+
+    
+    <p>Data obtained from https://simplemaps.com/data/world-cities</p>
+    
+  </body>
+</html>
