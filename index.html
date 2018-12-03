@@ -69,15 +69,15 @@
                   
                   if (projection=='WT'){
                        //Winkel_tripel :
-                       lon = lon_to_px(Winkel_tripel_x (worldcities[i][0],worldcities[i][1]))
-                       lat = lat_to_px (Winkel_tripel_y(worldcities[i][0],worldcities[i][1]))
+                       lon = lon_to_px_boundaries(Winkel_tripel_x (worldcities[i][0],worldcities[i][1]),minlon,maxlon)
+                       lat = lat_to_px_boundaries(Winkel_tripel_y(worldcities[i][0],worldcities[i][1]),minlat,maxlat)
                        var pop = 1+parseFloat(worldcities[i][2])/1200000
                   }
                   
                   if (projection=='KV'){
                        //Kavrayskiy_VII :
-                       lon = lon_to_px(Kavrayskiy_VII_lon (worldcities[i][0],worldcities[i][1]))
-                       lat = lat_to_px (worldcities[i][1])
+                       lon = lon_to_px_boundaries(Kavrayskiy_VII_lon (worldcities[i][0],worldcities[i][1]),minlon,maxlon)
+                       lat = lat_to_px_boundaries(worldcities[i][1],minlat,maxlat)
                        var pop = 1.+parseFloat(worldcities[i][2])/1200000.
                   }
                   
@@ -126,22 +126,22 @@
                             
                           if (projection=='WT'){
                                 //Winkel_tripel grid:
-                                great_circ_lon = lon_to_px(Winkel_tripel_x (j*4,2*i))
-                                great_circ_lat = lat_to_px(Winkel_tripel_y (j*4,2*i))
-                                small_circ_lon = lon_to_px(Winkel_tripel_x (i*4,2*j))
-                                small_circ_lat = lat_to_px(Winkel_tripel_y (i*4,2*j))
-                                eqlon = lon_to_px(Winkel_tripel_x (i*4,2*j))
-                                eqlat = lat_to_px(Winkel_tripel_y (i*4,2*j))
+                                great_circ_lon = lon_to_px_boundaries(Winkel_tripel_x (j*4,2*i),minlon,maxlon)
+                                great_circ_lat = lat_to_px_boundaries(Winkel_tripel_y (j*4,2*i),minlat,maxlat)
+                                small_circ_lon = lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlon,maxlon)
+                                small_circ_lat = lat_to_px_boundaries(Winkel_tripel_y (i*4,2*j),minlat,maxlat)
+                                eqlon = lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlon,maxlon)
+                                eqlat = lat_to_px_boundaries(Winkel_tripel_y (i*4,2*j),minlat,maxlat)
                           };
                             
                           if (projection=='KV'){
                                 //Kavrayskiy_VII grid:
-                                great_circ_lon = lon_to_px(Kavrayskiy_VII_lon (j*4,2*i))
-                                great_circ_lat = lat_to_px(2*i)
-                                small_circ_lon = lon_to_px(Kavrayskiy_VII_lon (i*4,2*j))
-                                small_circ_lat = lat_to_px(2*j)
-                                eqlon = lon_to_px(Kavrayskiy_VII_lon (i*4,2*j))
-                                eqlat = lat_to_px(2*j)
+                                great_circ_lon = lon_to_px_boundaries(Kavrayskiy_VII_lon (j*4,2*i),minlon,maxlon)
+                                great_circ_lat = lat_to_px_boundaries(2*i,minlat,maxlat)
+                                small_circ_lon = lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlon,maxlon)
+                                small_circ_lat = lat_to_px_boundaries(2*j,minlat,maxlat)
+                                eqlon = lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlon,maxlon)
+                                eqlat = lat_to_px_boundaries(2*j,minlat,maxlat)
                           };
                           
                           d3.selectAll("#greatcircle"+i+'-'+j)
@@ -164,40 +164,40 @@
                       for (var j=-45; j<=45;j=j+5){
                         if (projection=='ST'){
                               //pure lat-long grid:
-                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px(parseFloat(j*4)) , lat_to_px (parseFloat(2*i)) ,1,grid_color,0,0,0.4)
-                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(parseFloat(i*4)) , lat_to_px (parseFloat(2*j)) ,1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px_boundaries(parseFloat(j*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*i),minlat,maxlat) ,1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(parseFloat(i*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat) ,1,grid_color,0,0,0.4)
                               if (j==0){
-                                  addcirc( 'grid_equator', 'equator_circle'+i+'-'+j, lon_to_px(parseFloat(i*4)) , lat_to_px (parseFloat(2*j)) ,1,'red',0,0,0.9)
+                                  addcirc( 'grid_equator', 'equator_circle'+i+'-'+j, lon_to_px_boundaries(parseFloat(i*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat) ,1,'red',0,0,0.9)
                               };
                         };
-                          
+                          /*
                         if (projection=='WT'){
                               //Winkel_tripel grid:
-                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (j*4,2*i)) , lat_to_px(Winkel_tripel_y(j*4,2*i)),1,grid_color,0,0,0.4)
-                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (i*4,2*j)) , lat_to_px(Winkel_tripel_y(i*4,2*j)),1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px_boundaries(Winkel_tripel_x (j*4,2*i),minlat,maxlat) , lat_to_px_boundaries(Winkel_tripel_y(j*4,2*i),minlat,maxlat),1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(Winkel_tripel_y(i*4,2*j),minlat,maxlat),1,grid_color,0,0,0.4)
                               if (j==0){
-                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px(Winkel_tripel_x (i*4,2*j)) , lat_to_px(Winkel_tripel_y(i*4,2*j)),1,'red',0,0,0.90)
+                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(Winkel_tripel_y(i*4,2*j),minlat,maxlat),1,'red',0,0,0.90)
                               };
                         };
                           
                         if (projection=='KV'){
                               //Kavrayskiy_VII grid:
-                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (j*4,2*i)) , lat_to_px(2*i) ,1,grid_color,0,0,0.4)
-                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (i*4,2*j)) , lat_to_px(2*j) ,1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (j*4,2*i),minlat,maxlat) , lat_to_px_boundaries(2*i,minlat,maxlat) ,1,grid_color,0,0,0.4)
+                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(2*j,minlat,maxlat) ,1,grid_color,0,0,0.4)
                               if (j==0){
-                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px(Kavrayskiy_VII_lon (i*4,2*j)) , lat_to_px(2*j) ,1,'red',0,0,0.9)
+                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(2*j,minlat,maxlat) ,1,'red',0,0,0.9)
                               };
-                        };
+                        };*/
                         grid_is_made = true
                     }
                 };
                 if (projection=='KV'){
-                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (i*4,88)) , lat_to_px(88) ,1,grid_color,0,0,0.4) //plot top horizontal gridline
-                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Kavrayskiy_VII_lon (i*4,-88)) , lat_to_px(-88) ,1,grid_color,0,0,0.4) //plot lowes horizontal gridline
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,88),minlon,maxlon) , lat_to_px_boundaries(88,minlat,maxlat) ,1,grid_color,0,0,0.4) //plot top horizontal gridline
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,-88),minlon,maxlon) , lat_to_px_boundaries(-88,minlat,maxlat) ,1,grid_color,0,0,0.4) //plot lowes horizontal gridline
                 };
                 if (projection=='WT'){
-                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (i*4,88)) , lat_to_px(Winkel_tripel_y(i*4,88)) ,1,grid_color,0,0,0.4) //plot top horizontal gridline
-                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px(Winkel_tripel_x (i*4,-88)) , lat_to_px(Winkel_tripel_y(-i*4,-88)) ,1,grid_color,0,0,0.4) //plot lowes horizontal gridline
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Winkel_tripel_x (i*4,88),minlon,maxlon) , lat_to_px_boundaries(Winkel_tripel_y(i*4,88),minlat,maxlat) ,1,grid_color,0,0,0.4) //plot top horizontal gridline
+                    addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Winkel_tripel_x (i*4,-88),minlon,maxlon) , lat_to_px_boundaries(Winkel_tripel_y(-i*4,-88),minlat,maxlat) ,1,grid_color,0,0,0.4) //plot lowes horizontal gridline
                 };
               };
         
