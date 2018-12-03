@@ -41,7 +41,7 @@
                             worldcities.push([parseFloat(d.lng),parseFloat(d.lat),parseFloat(d.population)]);
                             i=i+1
                             //add pure lat-long plot as initial plot
-                            addcirc( 'data', 'citycircle'+i, lon_to_px(parseFloat(d.lng)) , lat_to_px (parseFloat(d.lat)) ,1+parseFloat(d.population)/1200000,d3.select("#change_color_dropdown").node().value,0,0,0.25)
+                            addcirc( 'data', 'citycircle'+i, lon_to_px_boundaries(parseFloat(d.lng),-180,180) , lat_to_px_boundaries (parseFloat(d.lat),90,-90) ,1+parseFloat(d.population)/1200000,d3.select("#change_color_dropdown").node().value,0,0,0.25)
                         }
                       });	
                       data_is_read = true
@@ -201,6 +201,14 @@
           
         function lon_to_px (lon){
           return ((canvas_width)*(180+parseFloat(lon)))/360.
+        }
+        
+        function lon_to_px_boundaries (lon,lonmin,lonmax){
+          return canvas_width*(lon-lonmin)/(lonmax-lonmin)
+        }
+        
+        function lat_to_px_boundaries (lon,lonmin,lonmax){
+          return canvas_height*(lon-lonmin)/(lonmax-lonmin)
         }
         
         function lat_to_px (lat){
