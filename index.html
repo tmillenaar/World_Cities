@@ -17,6 +17,7 @@
 
         var current_projection = 'ST'
         var worldcities=[]
+        var cityname=[]
         var minlat = -90
         var maxlat = 90
         var minlon = -180
@@ -26,14 +27,29 @@
         grid_is_made = false
         
         addrect(0,0,'100%','100%','black','3px','black') //Create Background
+        var tooltip = svg.append('text')
+            .text("a simple tooltip")
+            .attr('y',70)        //x will be set when made visible upon hover
+            .style("visibility", "hidden")
+            .style('fill','White')
+            .style('stroke','black')
+            .style('stroke-width', '0px' )
+            .style('font-size', '50px')
+            .style("font-family","Times")
+            .style('font-style','oblique');
+        
+        //<text x="20" y="20" font-family="sans-serif" font-size="20px" fill="red">Hello!</text>
+        
+        
+        
         make_worldpicture('ST') //call for initial 
-
+        
         
         function make_worldpicture(projection){
               //d3.select("my_svg_canvas").selectAll("*").remove();
               
               
-              d3.csv("worldcities-reduced.csv", function(data) {  
+              d3.csv("worldcities.csv", function(data) {  
                   /*
                   Data file buidlup:
                   
@@ -46,15 +62,29 @@
                       data.forEach(function (d){
                         if (parseFloat(d.population) > 1){
                             worldcities.push([parseFloat(d.lng),parseFloat(d.lat),parseFloat(d.population)]);
+                            
                             //add pure lat-long plot as initial plot
                             addcirc( 'data', 'citycircle'+i, lon_to_px_boundaries(parseFloat(d.lng),minlon,maxlon) , lat_to_px_boundaries (parseFloat(d.lat),minlat,maxlat) ,1+parseFloat(d.population)/1200000,d3.select("#change_color_dropdown").node().value,0,0,0.25)
+                            
+                            svg.select("#citycircle"+i)
+                                .on('mouseover',function () {
+                                  tooltip.text(String(d.city+', '+d.country))
+                                  size = tooltip.node().getBBox();
+                                  var x = canvas_width/2.-size.width/2.
+                                  tooltip.attr('x', x)
+                                  tooltip.style("visibility", "visible")
+                                })
+                                .on('mouseout', function(){
+                                  tooltip.style("visibility", "hidden");
+                                });
+                            
                             i=i+1
                         }
                       });	
+                      //console.log(cityname)
                       data_is_read = true
                   }
               });
-              
               if (data_is_read){
                   grid_color = d3.select("#change_grid_color_dropdown").node().value
                   for (var i=0; i < (worldcities.length); i++) {
@@ -86,7 +116,7 @@
                       .attr('cx',lon)
                       .attr('cy',lat)
                       .attr('r',pop)
-                  
+                      
                   /*
                         if (projection=='ST'){
                             //pure lat-long plot
@@ -202,11 +232,7 @@
               };
         
         };
-        
-        d3.selectAll(".data").on('mouseover',function () {
-          console.log('Hit!')
-        });
-        
+                
         d3.selection("select").on("change",function(){
             var color = d3.select("#change_color_dropdown").node().value;
             d3.selectAll(".data").attr('fill',color)
