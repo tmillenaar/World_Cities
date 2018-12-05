@@ -203,6 +203,10 @@
         
         };
         
+        d3.selectAll(".data").on('mouseover',function () {
+          console.log('Hit!')
+        });
+        
         d3.selection("select").on("change",function(){
             var color = d3.select("#change_color_dropdown").node().value;
             d3.selectAll(".data").attr('fill',color)
@@ -284,7 +288,7 @@
         };
         
         function check_input(projection){
-              event.preventDefault();  //prevent page from refreshing after the 'limit to' submit
+              //event.preventDefault();  //prevent page from refreshing after the 'limit to' submit
               
               minlat = parseFloat(document.getElementById("lon_lat_bound1").value)
               maxlat = parseFloat(document.getElementById("lon_lat_bound2").value)
@@ -346,12 +350,12 @@
         
         <br>
     
-        <form id="lon_lat_bounds" onSubmit="check_input(current_projection)">
+        <form id="lon_lat_bounds">
             Lower bound latitude:   <input type="text" id="lon_lat_bound1"><br>
             Upper bound latitude:   <input type="text" id="lon_lat_bound2"><br>
             Lower bound longtitude: <input type="text" id="lon_lat_bound3"><br>
             Upper bound longtitude: <input type="text" id="lon_lat_bound4"><br>
-            <input type="submit" value="Limit to"/>&nbsp&nbsp&nbsp 
+            <input type="button" value="Limit to" onclick="check_input(current_projection)"/>&nbsp&nbsp&nbsp
             <input type="button" value="Reset bounds" onclick="reset_bounds(current_projection)"/>&nbsp&nbsp&nbsp<br><br>
         </form>     
     </p>
