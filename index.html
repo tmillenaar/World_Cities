@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>World city population</title>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
   </head>
     <body>
     <h1>World city population</h1>
@@ -13,7 +13,9 @@
         var svg = d3.select("body").append("svg")
                     .attr('id','my_svg_canvas')
                     .attr('height', canvas_height)
-                    .attr('width', canvas_width);
+                    .attr('width', canvas_width)
+                    .call(d3.zoom().on("zoom", zoomed).translateExtent([[0, 0], [canvas_width, canvas_height]]).scaleExtent([1, 40]))
+                    .append("g")
 
         var current_projection = 'ST'
         var worldcities=[]
@@ -40,7 +42,21 @@
         
         //<text x="20" y="20" font-family="sans-serif" font-size="20px" fill="red">Hello!</text>
         
+        function zoomed() {
+            //if (d3.select('svg').attr('height')<=800){
+            svg.attr("transform", d3.event.transform);//..extent([extent]);
+           
+        }
         
+        var x = d3.scaleLinear()
+          .domain([0, canvas_width])
+          .range([0, canvas_width]);
+
+        var y = d3.scaleLinear()
+            .domain([0, canvas_height])
+            .range([0, canvas_height]);
+            
+       
         
         make_worldpicture('ST') //call for initial 
         
@@ -297,7 +313,8 @@
               .attr('height', height)
               .attr('fill', fill)
               .attr('stroke-width', stroke_width)
-              .attr('stroke', stroke);
+              .attr('stroke', stroke)
+              .append("g");
         };
         
         function addcirc(classid,id,x,y,diameter,fill,stroke_width,stroke,alpha) {
@@ -310,7 +327,8 @@
               .attr('fill', fill)
               .attr('stroke-width', stroke_width)
               .attr('stroke', stroke)
-              .attr('fill-opacity', alpha);
+              .attr('fill-opacity', alpha)
+              .append("g");
         };
         
         function check_input(projection){
