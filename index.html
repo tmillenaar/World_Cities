@@ -10,7 +10,19 @@
     <script>
         var canvas_height = 650
         var canvas_width = 1000
-        var x = 0
+        var current_projection = 'ST'
+        var worldcities=[]
+        var cityname=[]
+        var zoomlvl = { k:1,
+                        x:0,
+                        y:0}
+        var minlat = -90
+        var maxlat = 90
+        var minlon = -180
+        var maxlon = 180
+              
+        data_is_read = false
+        grid_is_made = false
         var minlon_old=-180
         var maxlon_old=180
         var minlat_old=-90
@@ -53,10 +65,9 @@
                 
             rect_origin.x = mouse_loc[0];
             rect_origin.y = mouse_loc[1];
-            //return 
-            //return rect_origin.y = mouse_loc[1];
         })
         .on("mousemove", function(){
+        //console.log(zoomlvl)
             var mouse_loc = d3.mouse( this)
             if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y > 0){
                 d3.select("#selection")
@@ -86,7 +97,6 @@
             }
         })
         .on( "mouseup", function() {
-        
             d3.select("#selection")
                   .style("visibility", "hidden")
             mouse_loc = d3.mouse( this)
@@ -143,25 +153,10 @@
             maxlat_old = maxlat
             minlon_old = minlon
             maxlon_old = maxlon
+            
+            svg.call(zoom.transform, d3.zoomIdentity)  //reset zoom by scrolling
             make_worldpicture(current_projection)
         });
-            
-
-        var current_projection = 'ST'
-        var worldcities=[]
-        var cityname=[]
-        var minlat = -90
-        var maxlat = 90
-        var minlon = -180
-        var maxlon = 180
-              
-        data_is_read = false
-        grid_is_made = false
-        
-        var zoom = d3.zoom()
-            .on("zoom", zoomed)
-            .translateExtent([[0, 0], [canvas_width, canvas_height]])
-            .scaleExtent([1, 40])
         
         addrect(0,0,'100%','100%','black','3px','black') //Create Background
         var tooltip = svg.append('text')
@@ -176,31 +171,12 @@
             .style('font-size', '30px')
             .style("font-family","Times")
             .style('font-style','oblique');
-        
-        function zoomed() {
-            //if (d3.select('svg').attr('height')<=800){
-            svg.attr("transform", d3.event.transform);//..extent([extent]);
-        }
-        
-//        d3.select('svg').call(zoom)
-        
-        var x = d3.scaleLinear()
-          .domain([0, canvas_width])
-          .range([0, canvas_width]);
 
-        var y = d3.scaleLinear()
-            .domain([0, canvas_height])
-            .range([0, canvas_height]);
-            
-       
         
-        make_worldpicture('ST') //call for initial 
+        make_worldpicture('ST') //call for initial rendering
         
         
         function make_worldpicture(projection){
-              //d3.select("my_svg_canvas").selectAll("*").remove();
-              
-              
               d3.csv("worldcities_sorted_on_population.csv", function(data) {  
                   /*
                   Data file buidlup:
@@ -221,9 +197,6 @@
                             d3.select("#citycircle"+i)
                                 .on('mouseover',function () {
                                   tooltip.text(String(d.city+', '+d.country))
-                                  //size = tooltip.node().getBBox();
-                                  //var x = canvas_width/2.-size.width/2.
-                                  //tooltip.attr('x', x)
                                   tooltip.style("visibility", "visible")
                                   tooltip.attr("y", (d3.event.pageY-30)+"px").attr("x",(d3.event.pageX+8)+"px");
                                   d3.select(this).style('fill','purple')
@@ -236,17 +209,15 @@
                             i=i+1
                         }
                       });	
-                      //console.log(cityname)
                       data_is_read = true
                   }
               });
               if (data_is_read){
                   grid_color = d3.select("#change_grid_color_dropdown").node().value
                   for (var i=0; i < (worldcities.length); i++) {
-                  //console.log(worldcities[i][2])
                   
                   if (projection=='ST'){
-                       //pure lat-long plot
+                       //pure lat-long 
                        lon = lon_to_px_boundaries(worldcities[i][0],minlon,maxlon)
                        lat = lat_to_px_boundaries(worldcities[i][1],minlat,maxlat)
                        var pop = 1+parseFloat(worldcities[i][2])/1200000
@@ -356,24 +327,6 @@
                                   addcirc( 'grid_equator', 'equator_circle'+i+'-'+j, lon_to_px_boundaries(parseFloat(i*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat) ,1,'red',0,0,0.9)
                               };
                         };
-                          /*
-                        if (projection=='WT'){
-                              //Winkel_tripel grid:
-                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px_boundaries(Winkel_tripel_x (j*4,2*i),minlat,maxlat) , lat_to_px_boundaries(Winkel_tripel_y(j*4,2*i),minlat,maxlat),1,grid_color,0,0,0.4)
-                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(Winkel_tripel_y(i*4,2*j),minlat,maxlat),1,grid_color,0,0,0.4)
-                              if (j==0){
-                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(Winkel_tripel_y(i*4,2*j),minlat,maxlat),1,'red',0,0,0.90)
-                              };
-                        };
-                          
-                        if (projection=='KV'){
-                              //Kavrayskiy_VII grid:
-                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (j*4,2*i),minlat,maxlat) , lat_to_px_boundaries(2*i,minlat,maxlat) ,1,grid_color,0,0,0.4)
-                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(2*j,minlat,maxlat) ,1,grid_color,0,0,0.4)
-                              if (j==0){
-                                  addcirc( 'grid_equator', 'equator_circle'+i+','+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlat,maxlat) , lat_to_px_boundaries(2*j,minlat,maxlat) ,1,'red',0,0,0.9)
-                              };
-                        };*/
                         grid_is_made = true
                     }
                 };
@@ -396,6 +349,26 @@
             d3.selectAll(".grid_circle").attr('fill',color)
         })
           
+          
+        function zoomed() {
+            svg.attr("transform", d3.event.transform);
+            zoomlvl = d3.event.transform
+        }
+        
+        function disable_zoom(){
+            svg.on('.zoom', null);
+        }
+        
+        function enable_zoom(){
+            svg.call(zoom);
+        }
+        
+        var zoom = d3.zoom()
+            .on("zoom", zoomed)
+            .translateExtent([[0, 0], [canvas_width, canvas_height]])
+            .scaleExtent([1, 40])
+            
+        svg.call(zoom);
         //d3.selectAll('svg').call(zoom)
           
         function lon_to_px (lon){
@@ -407,26 +380,37 @@
         }
         
         function px_to_lon (px){
-          return (maxlon_old-minlon_old)/canvas_width*px+minlon_old
+          minlon_old_warped = minlon_old*zoomlvl.k-zoomlvl.x
+          maxlon_old_warped = maxlon_old*zoomlvl.k-zoomlvl.x
+          px_warped = px-zoomlvl.x//-zoomlvl.x
+          canvas_width_warped = canvas_width*zoomlvl.k
+          return ((maxlon_old-minlon_old)/(canvas_width_warped)*px_warped+minlon_old)
           //return (maxlon_old-minlon_old)*px/canvas_width-(maxlon_old-minlon_old)/2
         }
+        
+        
         
         function lat_to_px (lat){
           return canvas_height-canvas_height*(90+parseFloat(lat))/180
         }
         
         function px_to_lat (px){
-          return maxlat_old-(maxlat_old-minlat_old)/canvas_height*px
+          minlat_old_warped = minlat_old*zoomlvl.k-zoomlvl.y
+          maxlat_old_warped = maxlat_old*zoomlvl.k-zoomlvl.y
+          px_warped = px-zoomlvl.y//px*zoomlvl.k//-zoomlvl.y
+          canvas_height_warped = canvas_height*zoomlvl.k
+          return (maxlat_old-(maxlat_old-minlat_old)/canvas_height_warped*px_warped)
           //return (maxlat_old-minlat_old)*(canvas_height-px)/canvas_height-(maxlat_old-minlat_old)/2.
         }
         
         function lat_to_px_boundaries (lon,lonmin,lonmax){
-          if (lonmin >= -90 && lonmax <= 90 && lonmin < lonmax){
+        return canvas_height-canvas_height*(lon-lonmin)/(lonmax-lonmin)
+          /*if (lonmin >= -90 && lonmax <= 90 && lonmin < lonmax){
               return canvas_height-canvas_height*(lon-lonmin)/(lonmax-lonmin)
           }else{
               console.log('error, min or max latitude out of bounds')
               return canvas_height-canvas_height*(lon+90)/(90+90)
-          }
+          }*/
         }
         
         function Kavrayskiy_VII_lon (lon,lat){
@@ -500,6 +484,7 @@
         }
         
         function reset_bounds(projection){
+            svg.call(zoom.transform, d3.zoomIdentity)
             minlat = -90
             maxlat = 90
             minlon = -180
@@ -526,6 +511,9 @@
               make_worldpicture(projection)
         };
     
+    
+    d3.selectAll('g').on("contextmenu", function() {
+            d3.event.preventDefault()});
     </script>
     
     <br>
@@ -533,6 +521,8 @@
     <input type="button" value="No projection" onclick="new_projection('ST')"/>&nbsp&nbsp&nbsp
     <input type="button" value="Kavrayskiy VII projection" onclick="new_projection('KV')"/>&nbsp&nbsp&nbsp
     <input type="button" value="Winkel Tripel projection" onclick="new_projection('WT')"/>&nbsp&nbsp&nbsp 
+    <input type="button" value="Enable free zoom" onclick="enable_zoom()"/>&nbsp&nbsp&nbsp
+    <input type="button" value="Disable free zoom" onclick="disable_zoom()"/>&nbsp&nbsp&nbsp
     <input type="button" value="Reset zoom" onclick="reset_bounds(current_projection)"/>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <br><br>
     
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data Color:   
