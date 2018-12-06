@@ -8,14 +8,148 @@
     <body>
     <h1>World city population</h1>
     <script>
-        var canvas_height = 700
-        var canvas_width = 1200
+        var canvas_height = 650
+        var canvas_width = 1000
+        var x = 0
+        var minlon_old=-180
+        var maxlon_old=180
+        var minlat_old=-90
+        var maxlat_old=90
+
         var svg = d3.select("body").append("svg")
-                    .attr('id','my_svg_canvas')
-                    .attr('height', canvas_height)
-                    .attr('width', canvas_width)
-                    .call(d3.zoom().on("zoom", zoomed).translateExtent([[0, 0], [canvas_width, canvas_height]]).scaleExtent([1, 40]))
-                    .append("g")
+            .attr('id','my_svg_canvas')
+            .attr('height', canvas_height)
+            .attr('width', canvas_width)
+            .append("g")
+            
+        
+
+        var rect_origin = {
+            x : 150,
+            y : 150
+        }
+        
+        d3.select('svg').append("rect")
+            .attr('x', 100)
+            .attr('y', 100)
+            .attr('width', 0)
+            .attr('height', 0)
+            .attr('fill', 'transparent')
+            .attr('stroke-width', 2)
+            .attr('stroke', 'grey')
+            .attr('id','selection')
+            .style("z-index", "11")
+            .style("visibility", "hidden")  
+        
+        d3.select('svg').on( "mousedown", function() {
+            var mouse_loc = d3.mouse( this);
+            
+            d3.select("#selection")
+                .attr('x', mouse_loc[0]-2)
+                .attr('y', mouse_loc[1]-2)
+                .attr('width','1px')
+                .attr('height','1px')
+                .style("visibility", "visible")
+                
+            rect_origin.x = mouse_loc[0];
+            rect_origin.y = mouse_loc[1];
+            //return 
+            //return rect_origin.y = mouse_loc[1];
+        })
+        .on("mousemove", function(){
+            var mouse_loc = d3.mouse( this)
+            if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y > 0){
+                d3.select("#selection")
+                    .attr('x',rect_origin.x)
+                    .attr('y',rect_origin.y)
+                    .attr('width',mouse_loc[0]-rect_origin.x+'px')
+                    .attr('height',(mouse_loc[1]-rect_origin.y +'px'))
+            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y < 0){
+                d3.select("#selection")
+                    .attr('x',mouse_loc[0])
+                    .attr('y',mouse_loc[1])
+                    .attr('width',rect_origin.x-mouse_loc[0]+'px')
+                    .attr('height',rect_origin.y-mouse_loc[1]+'px')
+            
+            }else if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y < 0){
+                d3.select("#selection")
+                    .attr('x',rect_origin.x)
+                    .attr('y',mouse_loc[1])
+                    .attr('width',mouse_loc[0]-rect_origin.x+'px')
+                    .attr('height',(rect_origin.y-mouse_loc[1]+'px'))
+            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y > 0){
+                d3.select("#selection")
+                    .attr('x',mouse_loc[0])
+                    .attr('y',rect_origin.y)
+                    .attr('width',rect_origin.x-mouse_loc[0]+'px')
+                    .attr('height',(mouse_loc[1]-rect_origin.y+'px'))
+            }
+        })
+        .on( "mouseup", function() {
+        
+            d3.select("#selection")
+                  .style("visibility", "hidden")
+            mouse_loc = d3.mouse( this)
+            //console.log(mouse_loc)
+            if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y > 0){
+                d3.select("#selection").transition().delay(0)
+                    .attr('x',rect_origin.x)
+                    .attr('y',rect_origin.y)
+                    .attr('width',mouse_loc[0]-rect_origin.x)
+                    .attr('height',(mouse_loc[1]-rect_origin.y +'px'));
+                console.log((mouse_loc[1]))
+                console.log((rect_origin.y))
+                console.log((rect_origin.x))
+                console.log((mouse_loc[0]))
+                
+                console.log(px_to_lat(mouse_loc[1]))
+                console.log(px_to_lat(rect_origin.y))
+                console.log(px_to_lon(rect_origin.x))
+                console.log(px_to_lon(mouse_loc[0])) 
+                minlat = parseFloat(px_to_lat(mouse_loc[1]))
+                maxlat = parseFloat(px_to_lat(rect_origin.y))
+                minlon = parseFloat(px_to_lon(rect_origin.x))
+                maxlon = parseFloat(px_to_lon(mouse_loc[0]))
+                minlat_old = minlat
+                maxlat_old = maxlat
+                minlon_old = minlon
+                maxlon_old = maxlon
+            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y < 0){
+                d3.select("#selection").transition().delay(0)
+                    .attr('x',mouse_loc[0])
+                    .attr('y',mouse_loc[1])
+                    .attr('width',rect_origin.x-mouse_loc[0]+'px')
+                    .attr('height',rect_origin.y-mouse_loc[1]+'px')
+                //minlat = parseFloat(document.getElementById("lon_lat_bound1").value)
+               // maxlat = parseFloat(document.getElementById("lon_lat_bound2").value)
+                //minlon = parseFloat(document.getElementById("lon_lat_bound3").value)
+                //maxlon = parseFloat(document.getElementById("lon_lat_bound4").value)
+            
+            }else if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y < 0){
+                d3.select("#selection").transition().delay(0)
+                    .attr('x',rect_origin.x)
+                    .attr('y',mouse_loc[1])
+                    .attr('width',mouse_loc[0]-rect_origin.x+'px')
+                    .attr('height',(rect_origin.y-mouse_loc[1]+'px'))
+               // minlat = parseFloat(document.getElementById("lon_lat_bound1").value)
+               // maxlat = parseFloat(document.getElementById("lon_lat_bound2").value)
+               // minlon = parseFloat(document.getElementById("lon_lat_bound3").value)
+               // maxlon = parseFloat(document.getElementById("lon_lat_bound4").value)
+            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y > 0){
+                d3.select("#selection").transition().delay(0)
+                    .attr('x',mouse_loc[0])
+                    .attr('y',rect_origin.y)
+                    .attr('width',rect_origin.x-mouse_loc[0]+'px')
+                    .attr('height',(mouse_loc[1]-rect_origin.y+'px'))
+               // minlat = parseFloat(document.getElementById("lon_lat_bound1").value)
+               // maxlat = parseFloat(document.getElementById("lon_lat_bound2").value)
+               // minlon = parseFloat(document.getElementById("lon_lat_bound3").value)
+               // maxlon = parseFloat(document.getElementById("lon_lat_bound4").value)
+            }
+            
+            make_worldpicture(current_projection)
+        });
+            
 
         var current_projection = 'ST'
         var worldcities=[]
@@ -28,25 +162,31 @@
         data_is_read = false
         grid_is_made = false
         
+        var zoom = d3.zoom()
+            .on("zoom", zoomed)
+            .translateExtent([[0, 0], [canvas_width, canvas_height]])
+            .scaleExtent([1, 40])
+        
         addrect(0,0,'100%','100%','black','3px','black') //Create Background
         var tooltip = svg.append('text')
             .text("a simple tooltip")
-            .attr('y',70)        //x will be set when made visible upon hover
+            .attr("id","tooltipID")
+            .style("position", "absolute")
+            .style("z-index", "10")
             .style("visibility", "hidden")
             .style('fill','White')
             .style('stroke','black')
             .style('stroke-width', '0px' )
-            .style('font-size', '50px')
+            .style('font-size', '30px')
             .style("font-family","Times")
             .style('font-style','oblique');
-        
-        //<text x="20" y="20" font-family="sans-serif" font-size="20px" fill="red">Hello!</text>
         
         function zoomed() {
             //if (d3.select('svg').attr('height')<=800){
             svg.attr("transform", d3.event.transform);//..extent([extent]);
-           
         }
+        
+//        d3.select('svg').call(zoom)
         
         var x = d3.scaleLinear()
           .domain([0, canvas_width])
@@ -85,10 +225,11 @@
                             svg.select("#citycircle"+i)
                                 .on('mouseover',function () {
                                   tooltip.text(String(d.city+', '+d.country))
-                                  size = tooltip.node().getBBox();
-                                  var x = canvas_width/2.-size.width/2.
-                                  tooltip.attr('x', x)
+                                  //size = tooltip.node().getBBox();
+                                  //var x = canvas_width/2.-size.width/2.
+                                  //tooltip.attr('x', x)
                                   tooltip.style("visibility", "visible")
+                                  tooltip.attr("y", (d3.event.pageY-30)+"px").attr("x",(d3.event.pageX+8)+"px");
                                 })
                                 .on('mouseout', function(){
                                   tooltip.style("visibility", "hidden");
@@ -132,6 +273,7 @@
                       .attr('cx',lon)
                       .attr('cy',lat)
                       .attr('r',pop)
+                      
                       
                   /*
                         if (projection=='ST'){
@@ -256,6 +398,8 @@
             d3.selectAll(".grid_circle").attr('fill',color)
         })
           
+        //d3.selectAll('svg').call(zoom)
+          
         function lon_to_px (lon){
           return ((canvas_width)*(180+parseFloat(lon)))/360.
         }
@@ -264,8 +408,18 @@
           return canvas_width*(lon-lonmin)/(lonmax-lonmin)
         }
         
+        function px_to_lon (px){
+          return (maxlon_old-minlon_old)/canvas_width*px+minlon_old
+          //return (maxlon_old-minlon_old)*px/canvas_width-(maxlon_old-minlon_old)/2
+        }
+        
         function lat_to_px (lat){
           return canvas_height-canvas_height*(90+parseFloat(lat))/180
+        }
+        
+        function px_to_lat (px){
+          return maxlat_old-(maxlat_old-minlat_old)/canvas_height*px
+          //return (maxlat_old-minlat_old)*(canvas_height-px)/canvas_height-(maxlat_old-minlat_old)/2.
         }
         
         function lat_to_px_boundaries (lon,lonmin,lonmax){
@@ -352,6 +506,11 @@
             maxlat = 90
             minlon = -180
             maxlon = 180
+            minlat_old = minlat
+            maxlat_old = maxlat
+            minlon_old = minlon
+            maxlon_old = maxlon
+            
             make_worldpicture(projection)
         };
         
