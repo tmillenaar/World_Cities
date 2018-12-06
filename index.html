@@ -90,63 +90,59 @@
             d3.select("#selection")
                   .style("visibility", "hidden")
             mouse_loc = d3.mouse( this)
-            //console.log(mouse_loc)
-            if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y > 0){
-                d3.select("#selection").transition().delay(0)
+
+            if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y > 0){ //bot right from origin
+                d3.select("#selection")
                     .attr('x',rect_origin.x)
                     .attr('y',rect_origin.y)
                     .attr('width',mouse_loc[0]-rect_origin.x)
                     .attr('height',(mouse_loc[1]-rect_origin.y +'px'));
-                console.log((mouse_loc[1]))
-                console.log((rect_origin.y))
-                console.log((rect_origin.x))
-                console.log((mouse_loc[0]))
-                
-                console.log(px_to_lat(mouse_loc[1]))
-                console.log(px_to_lat(rect_origin.y))
-                console.log(px_to_lon(rect_origin.x))
-                console.log(px_to_lon(mouse_loc[0])) 
+ 
                 minlat = parseFloat(px_to_lat(mouse_loc[1]))
                 maxlat = parseFloat(px_to_lat(rect_origin.y))
                 minlon = parseFloat(px_to_lon(rect_origin.x))
                 maxlon = parseFloat(px_to_lon(mouse_loc[0]))
-                minlat_old = minlat
-                maxlat_old = maxlat
-                minlon_old = minlon
-                maxlon_old = maxlon
-            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y < 0){
-                d3.select("#selection").transition().delay(0)
+                
+            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y < 0){ //top left from origin
+                d3.select("#selection")
                     .attr('x',mouse_loc[0])
                     .attr('y',mouse_loc[1])
                     .attr('width',rect_origin.x-mouse_loc[0]+'px')
                     .attr('height',rect_origin.y-mouse_loc[1]+'px')
-                //minlat = parseFloat(document.getElementById("lon_lat_bound1").value)
-               // maxlat = parseFloat(document.getElementById("lon_lat_bound2").value)
-                //minlon = parseFloat(document.getElementById("lon_lat_bound3").value)
-                //maxlon = parseFloat(document.getElementById("lon_lat_bound4").value)
+                    
+                minlat = parseFloat(px_to_lat(rect_origin.y))
+                maxlat = parseFloat(px_to_lat(mouse_loc[1]))
+                minlon = parseFloat(px_to_lon(mouse_loc[0]))
+                maxlon = parseFloat(px_to_lon(rect_origin.x))
             
-            }else if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y < 0){
-                d3.select("#selection").transition().delay(0)
+            }else if(mouse_loc[0]-rect_origin.x > 0 && mouse_loc[1]-rect_origin.y < 0){ //top right from origin
+                d3.select("#selection")
                     .attr('x',rect_origin.x)
                     .attr('y',mouse_loc[1])
                     .attr('width',mouse_loc[0]-rect_origin.x+'px')
                     .attr('height',(rect_origin.y-mouse_loc[1]+'px'))
-               // minlat = parseFloat(document.getElementById("lon_lat_bound1").value)
-               // maxlat = parseFloat(document.getElementById("lon_lat_bound2").value)
-               // minlon = parseFloat(document.getElementById("lon_lat_bound3").value)
-               // maxlon = parseFloat(document.getElementById("lon_lat_bound4").value)
-            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y > 0){
-                d3.select("#selection").transition().delay(0)
+                    
+                minlat = parseFloat(px_to_lat(rect_origin.y))
+                maxlat = parseFloat(px_to_lat(mouse_loc[1]))
+                minlon = parseFloat(px_to_lon(rect_origin.x))
+                maxlon = parseFloat(px_to_lon(mouse_loc[0]))
+                
+            }else if(mouse_loc[0]-rect_origin.x < 0 && mouse_loc[1]-rect_origin.y > 0){ //bot left from origin
+                d3.select("#selection")
                     .attr('x',mouse_loc[0])
                     .attr('y',rect_origin.y)
                     .attr('width',rect_origin.x-mouse_loc[0]+'px')
                     .attr('height',(mouse_loc[1]-rect_origin.y+'px'))
-               // minlat = parseFloat(document.getElementById("lon_lat_bound1").value)
-               // maxlat = parseFloat(document.getElementById("lon_lat_bound2").value)
-               // minlon = parseFloat(document.getElementById("lon_lat_bound3").value)
-               // maxlon = parseFloat(document.getElementById("lon_lat_bound4").value)
+                    
+                minlat = parseFloat(px_to_lat(mouse_loc[1]))
+                maxlat = parseFloat(px_to_lat(rect_origin.y))
+                minlon = parseFloat(px_to_lon(mouse_loc[0]))
+                maxlon = parseFloat(px_to_lon(rect_origin.x))
             }
-            
+            minlat_old = minlat
+            maxlat_old = maxlat
+            minlon_old = minlon
+            maxlon_old = maxlon
             make_worldpicture(current_projection)
         });
             
