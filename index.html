@@ -201,7 +201,7 @@
               //d3.select("my_svg_canvas").selectAll("*").remove();
               
               
-              d3.csv("worldcities.csv", function(data) {  
+              d3.csv("worldcities_sorted_on_population.csv", function(data) {  
                   /*
                   Data file buidlup:
                   
@@ -218,7 +218,7 @@
                             //add pure lat-long plot as initial plot
                             addcirc( 'data', 'citycircle'+i, lon_to_px_boundaries(parseFloat(d.lng),minlon,maxlon) , lat_to_px_boundaries (parseFloat(d.lat),minlat,maxlat) ,1+parseFloat(d.population)/1200000,d3.select("#change_color_dropdown").node().value,0,0,0.25)
                             
-                            svg.select("#citycircle"+i)
+                            d3.select("#citycircle"+i)
                                 .on('mouseover',function () {
                                   tooltip.text(String(d.city+', '+d.country))
                                   //size = tooltip.node().getBBox();
@@ -226,8 +226,10 @@
                                   //tooltip.attr('x', x)
                                   tooltip.style("visibility", "visible")
                                   tooltip.attr("y", (d3.event.pageY-30)+"px").attr("x",(d3.event.pageX+8)+"px");
+                                  d3.select(this).style('fill','purple')
                                 })
                                 .on('mouseout', function(){
+                                  d3.select(this).style('fill',d3.select("#change_color_dropdown").node().value)
                                   tooltip.style("visibility", "hidden");
                                 });
                             
@@ -530,7 +532,8 @@
     <p> 
     <input type="button" value="No projection" onclick="new_projection('ST')"/>&nbsp&nbsp&nbsp
     <input type="button" value="Kavrayskiy VII projection" onclick="new_projection('KV')"/>&nbsp&nbsp&nbsp
-    <input type="button" value="Winkel Tripel projection" onclick="new_projection('WT')"/>&nbsp&nbsp&nbsp <br><br>
+    <input type="button" value="Winkel Tripel projection" onclick="new_projection('WT')"/>&nbsp&nbsp&nbsp 
+    <input type="button" value="Reset zoom" onclick="reset_bounds(current_projection)"/>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <br><br>
     
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data Color:   
         <select id="change_color_dropdown">
@@ -548,15 +551,7 @@
         </select>
         
         <br>
-    
-        <form id="lon_lat_bounds">
-            Lower bound latitude:   <input type="text" id="lon_lat_bound1"><br>
-            Upper bound latitude:   <input type="text" id="lon_lat_bound2"><br>
-            Lower bound longtitude: <input type="text" id="lon_lat_bound3"><br>
-            Upper bound longtitude: <input type="text" id="lon_lat_bound4"><br>
-            <input type="button" value="Limit to" onclick="check_input(current_projection)"/>&nbsp&nbsp&nbsp
-            <input type="button" value="Reset bounds" onclick="reset_bounds(current_projection)"/>&nbsp&nbsp&nbsp<br><br>
-        </form>     
+              
     </p>
     
     <p>Data obtained from https://simplemaps.com/data/world-cities</p>
