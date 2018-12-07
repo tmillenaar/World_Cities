@@ -159,6 +159,9 @@
         });
         
         addrect(0,0,'100%','100%','black','3px','black') //Create Background
+        
+        tooltip_offset_y = -30
+        tooltip_offset_x = 8
         var tooltip = svg.append('text')
             .text("a simple tooltip")
             .attr("id","tooltipID")
@@ -196,10 +199,12 @@
                             
                             d3.select("#citycircle"+i)
                                 .on('mouseover',function () {
+                                mouse_loc = d3.mouse( this)
                                   tooltip.text(String(d.city+', '+d.country))
                                   tooltip.style("visibility", "visible")
-                                  tooltip.attr("y", (d3.event.pageY-30)+"px").attr("x",(d3.event.pageX+8)+"px");
+                                  tooltip.attr("y", (mouse_loc[1]+40/zoomlvl.k)+"px").attr("x",(mouse_loc[0]+15/zoomlvl.k)+"px");
                                   d3.select(this).style('fill','purple')
+                                  
                                 })
                                 .on('mouseout', function(){
                                   d3.select(this).style('fill',d3.select("#change_color_dropdown").node().value)
@@ -353,6 +358,12 @@
         function zoomed() {
             svg.attr("transform", d3.event.transform);
             zoomlvl = d3.event.transform
+            console.log('sdfa')
+            tooltip .style('font-size', (30/zoomlvl.k)+'px')
+            var mouse_loc = d3.mouse( this);
+            tooltip.attr("y", (mouse_loc[1]+40/zoomlvl.k)+"px").attr("x",(mouse_loc[0]+15/zoomlvl.k)+"px");
+            tooltip_offset_y = 30/zoomlvl.k
+            tooltip_offset_x = 8/zoomlvl.k
         }
         
         function disable_zoom(){
@@ -380,8 +391,6 @@
         }
         
         function px_to_lon (px){
-          minlon_old_warped = minlon_old*zoomlvl.k-zoomlvl.x
-          maxlon_old_warped = maxlon_old*zoomlvl.k-zoomlvl.x
           px_warped = px-zoomlvl.x//-zoomlvl.x
           canvas_width_warped = canvas_width*zoomlvl.k
           return ((maxlon_old-minlon_old)/(canvas_width_warped)*px_warped+minlon_old)
@@ -395,8 +404,6 @@
         }
         
         function px_to_lat (px){
-          minlat_old_warped = minlat_old*zoomlvl.k-zoomlvl.y
-          maxlat_old_warped = maxlat_old*zoomlvl.k-zoomlvl.y
           px_warped = px-zoomlvl.y//px*zoomlvl.k//-zoomlvl.y
           canvas_height_warped = canvas_height*zoomlvl.k
           return (maxlat_old-(maxlat_old-minlat_old)/canvas_height_warped*px_warped)
