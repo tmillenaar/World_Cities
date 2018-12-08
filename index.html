@@ -7,12 +7,12 @@
   </head>
     <body>
     <h1>World city population</h1>
+    <p>Zoom by scrolling and resize the area of interest by dragging right mouse button.</p>
     <script>
         var canvas_height = 650
         var canvas_width = 1000
         var current_projection = 'ST'
         var worldcities=[]
-        var cityname=[]
         var zoomlvl = { k:1,
                         x:0,
                         y:0}
@@ -20,22 +20,22 @@
         var maxlat = 90
         var minlon = -180
         var maxlon = 180
-              
-        data_is_read = false
-        grid_is_made = false
+        
         var minlon_old=-180
         var maxlon_old=180
         var minlat_old=-90
         var maxlat_old=90
+              
+        data_is_read = false
+        grid_is_made = false
+        
 
         var svg = d3.select("body").append("svg")
             .attr('id','my_svg_canvas')
-            .attr('height', canvas_height)
+            .attr('height', canvas_height+4) //+4 includes 2 px margin at top and bot
             .attr('width', canvas_width)
             .append("g")
             
-        
-
         var rect_origin = {
             x : 150,
             y : 150
@@ -154,7 +154,7 @@
             minlon_old = minlon
             maxlon_old = maxlon
             
-            svg.call(zoom.transform, d3.zoomIdentity)  //reset zoom by scrolling
+            svg.call(zoom.transform, d3.zoomIdentity)  //reset zoom done by scrolling
             make_worldpicture(current_projection)
         });
         
@@ -225,7 +225,7 @@
                        //pure lat-long 
                        lon = lon_to_px_boundaries(worldcities[i][0],minlon,maxlon)
                        lat = lat_to_px_boundaries(worldcities[i][1],minlat,maxlat)
-                       var pop = 1+parseFloat(worldcities[i][2])/1200000
+                       var pop = 1+parseFloat(worldcities[i][2])/(1200000)
                   }
                   
                   if (projection=='WT'){
@@ -268,20 +268,24 @@
                         */
                   }
               }else{
-                  grid_color = 'orange'
+                  grid_color = 'hotpink'
               }
               
               
                     
               if (grid_is_made){
-                  for (var i=-45; i<=45;i++){
+                  for (var i=-44; i<=45;i++){
                       for (var j=-45; j<=45;j=j+5){
                           if (projection=='ST'){
                                 //pure lat-long grid:
                                 great_circ_lon = lon_to_px_boundaries (parseFloat(j*4),minlon,maxlon)
+                                var great_circ_lon_2 = great_circ_lon
                                 great_circ_lat = lat_to_px_boundaries (parseFloat(2*i),minlat,maxlat)
+                                var great_circ_lat_2 = lat_to_px_boundaries (parseFloat(2*(i-1)),minlat,maxlat)
                                 small_circ_lon = lon_to_px_boundaries (parseFloat(i*4),minlon,maxlon)
+                                var small_circ_lon_2 = lon_to_px_boundaries (parseFloat((i-1)*4),minlon,maxlon)
                                 small_circ_lat = lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat)
+                                var small_circ_lat_2 = small_circ_lat
                                 eqlon = lon_to_px_boundaries (parseFloat(i*4),minlon,maxlon)
                                 eqlat = lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat)
                           };
@@ -289,9 +293,13 @@
                           if (projection=='WT'){
                                 //Winkel_tripel grid:
                                 great_circ_lon = lon_to_px_boundaries(Winkel_tripel_x (j*4,2*i),minlon,maxlon)
+                                var great_circ_lon_2 = lon_to_px_boundaries(Winkel_tripel_x (j*4,2*(i-1)),minlon,maxlon)
                                 great_circ_lat = lat_to_px_boundaries(Winkel_tripel_y (j*4,2*i),minlat,maxlat)
+                                var great_circ_lat_2 = lat_to_px_boundaries(Winkel_tripel_y (j*4,2*(i-1)),minlat,maxlat)
                                 small_circ_lon = lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlon,maxlon)
+                                var small_circ_lon_2 = lon_to_px_boundaries(Winkel_tripel_x ((i-1)*4,2*j),minlon,maxlon)
                                 small_circ_lat = lat_to_px_boundaries(Winkel_tripel_y (i*4,2*j),minlat,maxlat)
+                                var small_circ_lat_2 = lat_to_px_boundaries(Winkel_tripel_y ((i-1)*4,2*j),minlat,maxlat)
                                 eqlon = lon_to_px_boundaries(Winkel_tripel_x (i*4,2*j),minlon,maxlon)
                                 eqlat = lat_to_px_boundaries(Winkel_tripel_y (i*4,2*j),minlat,maxlat)
                           };
@@ -299,41 +307,85 @@
                           if (projection=='KV'){
                                 //Kavrayskiy_VII grid:
                                 great_circ_lon = lon_to_px_boundaries(Kavrayskiy_VII_lon (j*4,2*i),minlon,maxlon)
+                                var great_circ_lon_2 = lon_to_px_boundaries(Kavrayskiy_VII_lon ((j)*4,2*(i-1)),minlon,maxlon)
                                 great_circ_lat = lat_to_px_boundaries(2*i,minlat,maxlat)
-                                small_circ_lon = lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlon,maxlon)
+                                var great_circ_lat_2 = lat_to_px_boundaries(2*(i-1),minlat,maxlat)
+                                small_circ_lon = lon_to_px_boundaries(Kavrayskiy_VII_lon (-45*4,2*j),minlon,maxlon)
+                                var small_circ_lon_2 = lon_to_px_boundaries(Kavrayskiy_VII_lon ((45)*4,2*(j)),minlon,maxlon)
                                 small_circ_lat = lat_to_px_boundaries(2*j,minlat,maxlat)
+                                var small_circ_lat_2 = small_circ_lat
                                 eqlon = lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,2*j),minlon,maxlon)
                                 eqlat = lat_to_px_boundaries(2*j,minlat,maxlat)
                           };
                           
-                          d3.selectAll("#greatcircle"+i+'-'+j)
+                          /*d3.selectAll("#greatcircle"+i+'-'+j)
                                 .attr('fill',d3.select("#change_grid_color_dropdown").node().value)
                                 .attr('cx',great_circ_lon)
-                                .attr('cy',great_circ_lat)
+                                .attr('cy',great_circ_lat)*/
                                 
-                          d3.selectAll("#smallcircle"+i+'-'+j)
+                          d3.select("#greatcircle_line"+i+'-'+j)
+                                .style('stroke',d3.select("#change_grid_color_dropdown").node().value)
+                                .attr('x1',great_circ_lon)
+                                .attr('y1',great_circ_lat)
+                                .attr('x2',great_circ_lon_2)
+                                .attr('y2',great_circ_lat_2)
+                                
+                          /*d3.selectAll("#smallcircle"+i+'-'+j)
                                 .attr('fill',d3.select("#change_grid_color_dropdown").node().value)
                                 .attr('cx',small_circ_lon)
-                                .attr('cy',small_circ_lat)
+                                .attr('cy',small_circ_lat)*/
                                 
-                          d3.selectAll("#equator_circle"+i+'-'+j)
-                                .attr('cx',eqlon)
-                                .attr('cy',eqlat)
+                          d3.select("#smallcircle_line"+i+'-'+j)
+                                .style('stroke',d3.select("#change_grid_color_dropdown").node().value)
+                                .attr('x1',small_circ_lon)
+                                .attr('y1',small_circ_lat)
+                                .attr('x2',small_circ_lon_2)
+                                .attr('y2',small_circ_lat_2)   
                       }
-                  }
+                      d3.select("#smallcircle_line"+i+'-'+'0')
+                                .attr('class','eq_line')
+                                .style('stroke','red') 
+                                .style('stroke-width','2px')
+                  } 
               }else{ //create inititial grid
                   for (var i=-45; i<=45;i++){
                       for (var j=-45; j<=45;j=j+5){
                         if (projection=='ST'){
                               //pure lat-long grid:
-                              addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px_boundaries(parseFloat(j*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*i),minlat,maxlat) ,1,grid_color,0,0,0.4)
-                              addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(parseFloat(i*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat) ,1,grid_color,0,0,0.4)
-                              if (j==0){
-                                  addcirc( 'grid_equator', 'equator_circle'+i+'-'+j, lon_to_px_boundaries(parseFloat(i*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat) ,1,'red',0,0,0.9)
-                              };
+                              //addcirc( 'grid_circle', 'greatcircle'+i+'-'+j, lon_to_px_boundaries(parseFloat(j*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*i),minlat,maxlat) ,1,grid_color,0,0,0.4)
+                              //addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(parseFloat(i*4),minlon,maxlon) , lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat) ,1,grid_color,0,0,0.4)
+                              svg.append('line')
+                                    .attr('class','gridline')
+                                    .attr('id','greatcircle_line'+i+'-'+j)
+                                    .attr('x1', lon_to_px_boundaries(parseFloat((j)*4),minlon,maxlon))
+                                    .attr('y1', lat_to_px_boundaries (parseFloat(2*(i-1)),minlat,maxlat))
+                                    .attr('x2', lon_to_px_boundaries(parseFloat(j*4),minlon,maxlon))
+                                    .attr('y2', lat_to_px_boundaries (parseFloat(2*i),minlat,maxlat))
+                                    .style('stroke', grid_color)
+                                    .style('stroke-width', '1px')
+                                    .style('stroke-dasharray',"1 6")
+                                    .append("g")
+                                                  
+                              svg.append('line')
+                                    .attr('class','gridline')
+                                    .attr('id','smallcircle_line'+i+'-'+j)
+                                    .attr('x1', lon_to_px_boundaries(parseFloat(i*4),minlon,maxlon))
+                                    .attr('y1', lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat))
+                                    .attr('x2', lon_to_px_boundaries(parseFloat((i-1)*4),minlon,maxlon))
+                                    .attr('y2', lat_to_px_boundaries (parseFloat(2*j),minlat,maxlat))
+                                    .style('stroke', grid_color)
+                                    .style('stroke-width', '1px')
+                                    .style('stroke-dasharray',"1 6")
+                                    .append("g")
+                              
+                              
                         };
                         grid_is_made = true
                     }
+                    d3.select("#smallcircle_line"+i+'-'+'0')
+                          .attr('class','eq_line')
+                          .style('stroke','red') 
+                          .style('stroke-width','2px')
                 };
                 if (projection=='KV'){
                     addcirc( 'grid_circle', 'smallcircle'+i+'-'+j, lon_to_px_boundaries(Kavrayskiy_VII_lon (i*4,88),minlon,maxlon) , lat_to_px_boundaries(88,minlat,maxlat) ,1,grid_color,0,0,0.4) //plot top horizontal gridline
@@ -351,14 +403,13 @@
             var color = d3.select("#change_color_dropdown").node().value;
             d3.selectAll(".data").attr('fill',color)
             var color = d3.select("#change_grid_color_dropdown").node().value;
-            d3.selectAll(".grid_circle").attr('fill',color)
+            d3.selectAll(".gridline").style('stroke',color)
         })
           
           
         function zoomed() {
             svg.attr("transform", d3.event.transform);
             zoomlvl = d3.event.transform
-            console.log('sdfa')
             tooltip .style('font-size', (30/zoomlvl.k)+'px')
             var mouse_loc = d3.mouse( this);
             tooltip.attr("y", (mouse_loc[1]+40/zoomlvl.k)+"px").attr("x",(mouse_loc[0]+15/zoomlvl.k)+"px");
@@ -380,6 +431,7 @@
             .scaleExtent([1, 40])
             
         svg.call(zoom);
+        //d3.select('g').call(zoom)
         //d3.selectAll('svg').call(zoom)
           
         function lon_to_px (lon){
@@ -411,7 +463,7 @@
         }
         
         function lat_to_px_boundaries (lon,lonmin,lonmax){
-        return canvas_height-canvas_height*(lon-lonmin)/(lonmax-lonmin)
+        return canvas_height-canvas_height*(lon-lonmin)/(lonmax-lonmin)+2 //+2 acts as margin at the top
           /*if (lonmin >= -90 && lonmax <= 90 && lonmin < lonmax){
               return canvas_height-canvas_height*(lon-lonmin)/(lonmax-lonmin)
           }else{
@@ -490,6 +542,15 @@
             make_worldpicture(projection)
         }
         
+        function limit_bounds() {
+            //disable_zoom()
+            
+            
+            //enable zoom on mouseup after dragging
+            
+            //enable_zoom()
+        }
+        
         function reset_bounds(projection){
             svg.call(zoom.transform, d3.zoomIdentity)
             minlat = -90
@@ -518,7 +579,6 @@
               make_worldpicture(projection)
         };
     
-    
     d3.selectAll('g').on("contextmenu", function() {
             d3.event.preventDefault()});
     </script>
@@ -528,8 +588,9 @@
     <input type="button" value="No projection" onclick="new_projection('ST')"/>&nbsp&nbsp&nbsp
     <input type="button" value="Kavrayskiy VII projection" onclick="new_projection('KV')"/>&nbsp&nbsp&nbsp
     <input type="button" value="Winkel Tripel projection" onclick="new_projection('WT')"/>&nbsp&nbsp&nbsp 
-    <input type="button" value="Enable free zoom" onclick="enable_zoom()"/>&nbsp&nbsp&nbsp
+    <!--<input type="button" value="Enable free zoom" onclick="enable_zoom()"/>&nbsp&nbsp&nbsp
     <input type="button" value="Disable free zoom" onclick="disable_zoom()"/>&nbsp&nbsp&nbsp
+    <input type="button" value="Limit bounds" onclick="limit_bounds()"/>&nbsp&nbsp&nbsp -->
     <input type="button" value="Reset zoom" onclick="reset_bounds(current_projection)"/>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <br><br>
     
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data Color:   
@@ -542,9 +603,9 @@
     
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Grid Color:   
         <select id="change_grid_color_dropdown">
+            <option value="hotpink">pink</option>
             <option value="orange">orange</option>
             <option value="white">white</option>
-            <option value="hotpink">Pink</option>
         </select>
         
         <br>
